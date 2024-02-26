@@ -1,14 +1,15 @@
-// @ts-check
 import antfu from '@antfu/eslint-config'
 
 export default antfu(
   {
     ignores: [
-      // eslint ignore globs here
+      // ignores
     ],
   },
   {
     rules: {
+      // write a rule which ensures semicolon at the end of line
+
       // overrides
     },
   },
