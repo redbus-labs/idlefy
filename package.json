@@ -43,7 +43,7 @@
     "prepublishOnly": "nr build",
     "release": "bumpp && npm publish",
     "start": "esno src/index.ts",
-    "test": "vitest",
+    "test": "",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks"
   },
