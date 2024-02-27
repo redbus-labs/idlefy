@@ -43,7 +43,7 @@
     "prepublishOnly": "nr build",
     "release": "bumpp && npm publish",
     "start": "esno src/index.ts",
-    "test": "",
+    "test": "echo \"Warning: no test specified\" && exit 0",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks"
   },
