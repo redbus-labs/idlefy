@@ -1,26 +1,15 @@
 import { cIC, rIC } from './idleCbWithPolyfill'
-import { createQueueMicrotask } from './queueMicrotask'
+import { createQueueMicrotask } from './utils/queueMicrotask'
+import { isBrowser, isSafari } from './utils/env'
+import { now } from './utils/now'
 
-declare global {
-  interface Window {
-    safari: any
-  }
+interface State {
+  time: number
+  visibilityState: 'hidden' | 'visible' | 'prerender' | 'unloaded'
 }
-type DocumentVisibilityState = 'hidden' | 'visible' | 'prerender' | 'unloaded'
+type Task = (state: State) => void
 
 const DEFAULT_MIN_TASK_TIME = 0
-function now() {
-  return Date.now()
-}
-const isBrowser = typeof window !== 'undefined' && window.document && window.document.createElement
-
-const isSafari_ = !!(
-  isBrowser
-  && 'safari' in window
-  && typeof window.safari === 'object'
-  && 'pushNotification' in (window.safari as any)
-)
-
 /**
  * Returns true if the IdleDeadline object exists and the remaining time is
  * less or equal to than the minTaskTime. Otherwise returns false.
@@ -32,12 +21,6 @@ function shouldYield(deadline?: IdleDeadline, minTaskTime?: number) {
 
   return false
 }
-
-interface State {
-  time: number
-  visibilityState: DocumentVisibilityState
-}
-type Task = (state: State) => void
 
 /**
  * A class wraps a queue of requestIdleCallback functions for two reasons:
@@ -81,7 +64,7 @@ export class IdleQueue {
       // - https://bugs.webkit.org/show_bug.cgi?id=151234
       // NOTE: we only add this to Safari because adding it to Firefox would
       // prevent the page from being eligible for bfcache.
-      if (isSafari_)
+      if (isSafari)
         addEventListener('beforeunload', this.runTasksImmediately, true)
     }
   }
@@ -141,7 +124,7 @@ export class IdleQueue {
       // - https://bugs.webkit.org/show_bug.cgi?id=151234
       // NOTE: we only add this to Safari because adding it to Firefox would
       // prevent the page from being eligible for bfcache.
-      if (isSafari_)
+      if (isSafari)
         removeEventListener('beforeunload', this.runTasksImmediately, true)
     }
   }
