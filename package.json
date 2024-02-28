@@ -4,16 +4,29 @@
   "version": "0.0.0",
   "packageManager": "pnpm@8.15.3",
   "description": "Defer non-critical tasks to run when the main thread is idle",
-  "author": "Anthony Fu <anthonyfu117@hotmail.com>",
+  "author": {
+    "name": "Harsh Choudhary",
+    "email": "harsh.hkc1006@gmail.com",
+    "url": "https://harshkc.in"
+  },
   "license": "MIT",
   "funding": "https://github.com/sponsors/harshkc",
-  "homepage": "https://github.com/harshkc/idlefy#readme",
+  "homepage": "https://github.com/redbus-labs/idlefy#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/harshkc/idlefy.git"
+    "url": "git+https://github.com/redbus-labs/idlefy.git"
   },
-  "bugs": "https://github.com/harshkc/idlefy/issues",
-  "keywords": [],
+  "bugs": "https://github.com/redbus-labs/idlefy/issues",
+  "keywords": [
+    "idle",
+    "defer",
+    "idle-until-urget",
+    "requestIdleCallback",
+    "cancelIdleCallback",
+    "requestIdleCallbackPolyfill",
+    "INP",
+    "Performance"
+  ],
   "sideEffects": false,
   "exports": {
     ".": {
