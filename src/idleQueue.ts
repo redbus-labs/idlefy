@@ -1,26 +1,16 @@
 import { cIC, rIC } from './idleCbWithPolyfill'
-import { createQueueMicrotask } from './queueMicrotask'
+import { createQueueMicrotask } from './utils/queueMicrotask'
+import { isBrowser, isSafari } from './utils/env'
+import { now } from './utils/now'
 
-declare global {
-  interface Window {
-    safari: any
-  }
+interface State {
+  time: number
+  visibilityState: 'hidden' | 'visible' | 'prerender' | 'unloaded'
 }
-type DocumentVisibilityState = 'hidden' | 'visible' | 'prerender' | 'unloaded'
+
+type Task = (state: State) => void
 
 const DEFAULT_MIN_TASK_TIME = 0
-function now() {
-  return Date.now()
-}
-const isBrowser = typeof window !== 'undefined' && window.document && window.document.createElement
-
-const isSafari_ = !!(
-  isBrowser
-  && 'safari' in window
-  && typeof window.safari === 'object'
-  && 'pushNotification' in (window.safari as any)
-)
-
 /**
  * Returns true if the IdleDeadline object exists and the remaining time is
  * less or equal to than the minTaskTime. Otherwise returns false.
@@ -33,26 +23,20 @@ function shouldYield(deadline?: IdleDeadline, minTaskTime?: number) {
   return false
 }
 
-interface State {
-  time: number
-  visibilityState: DocumentVisibilityState
-}
-type Task = (state: State) => void
-
 /**
- * A class wraps a queue of requestIdleCallback functions for two reasons:
- *   1. So other callers can know whether or not the queue is empty.
- *   2. So we can provide some guarantees that the queued functions will
- *      run in unload-type situations.
+ * This class manages a queue of tasks designed to execute during idle browser time.
+ *
+ * It allows checking whether tasks are pending and ensures task execution even
+ * in situations like page unload.
  */
 export class IdleQueue {
-  private idleCallbackHandle_: number | null
-  private taskQueue_: { state: State, task: Task, minTaskTime: number }[]
+  private idleCallbackHandle_: number | null = null
+  private taskQueue_: { state: State, task: Task, minTaskTime: number }[] = []
   private isProcessing_ = false
 
-  private state_: State | null
-  private defaultMinTaskTime_: number
-  private ensureTasksRun_: boolean
+  private state_: State | null = null
+  private defaultMinTaskTime_: number = DEFAULT_MIN_TASK_TIME
+  private ensureTasksRun_: boolean = false
   private queueMicrotask?: (callback: VoidFunction) => void
 
   /**
@@ -60,9 +44,6 @@ export class IdleQueue {
    * run the queue if the page is hidden (with fallback behavior for Safari).
    */
   constructor({ ensureTasksRun = false, defaultMinTaskTime = DEFAULT_MIN_TASK_TIME } = {}) {
-    this.idleCallbackHandle_ = null
-    this.taskQueue_ = []
-    this.state_ = null
     this.defaultMinTaskTime_ = defaultMinTaskTime
     this.ensureTasksRun_ = ensureTasksRun
 
@@ -74,15 +55,13 @@ export class IdleQueue {
     if (isBrowser && this.ensureTasksRun_) {
       addEventListener('visibilitychange', this.onVisibilityChange_, true)
 
-      // Safari does not reliably fire the `pagehide` or `visibilitychange`
-      // events when closing a tab, so we have to use `beforeunload` with a
-      // timeout to check whether the default action was prevented.
-      // - https://bugs.webkit.org/show_bug.cgi?id=151610
-      // - https://bugs.webkit.org/show_bug.cgi?id=151234
-      // NOTE: we only add this to Safari because adding it to Firefox would
-      // prevent the page from being eligible for bfcache.
-      if (isSafari_)
+      if (isSafari) {
+        // Safari workaround: Due to unreliable event behavior, we use 'beforeunload'
+        // to ensure tasks run if a tab/window is closed unexpectedly.
+        // NOTE: we only add this to Safari because adding it to Firefox would
+        // prevent the page from being eligible for bfcache.
         addEventListener('beforeunload', this.runTasksImmediately, true)
+      }
     }
   }
 
@@ -134,14 +113,7 @@ export class IdleQueue {
     if (isBrowser && this.ensureTasksRun_) {
       removeEventListener('visibilitychange', this.onVisibilityChange_, true)
 
-      // Safari does not reliably fire the `pagehide` or `visibilitychange`
-      // events when closing a tab, so we have to use `beforeunload` with a
-      // timeout to check whether the default action was prevented.
-      // - https://bugs.webkit.org/show_bug.cgi?id=151610
-      // - https://bugs.webkit.org/show_bug.cgi?id=151234
-      // NOTE: we only add this to Safari because adding it to Firefox would
-      // prevent the page from being eligible for bfcache.
-      if (isSafari_)
+      if (isSafari)
         removeEventListener('beforeunload', this.runTasksImmediately, true)
     }
   }
@@ -156,10 +128,12 @@ export class IdleQueue {
       visibilityState: isBrowser ? document.visibilityState : 'visible',
     }
 
+    const minTaskTime = Math.max(0, options?.minTaskTime || this.defaultMinTaskTime_)
+
     arrayMethod.call(this.taskQueue_, {
       state,
       task,
-      minTaskTime: options?.minTaskTime || this.defaultMinTaskTime_,
+      minTaskTime,
     })
 
     this.scheduleTasksToRun_()
@@ -205,7 +179,13 @@ export class IdleQueue {
 
           this.state_ = state
 
-          task(state)
+          try {
+            task(state)
+          }
+          catch (error) {
+            console.error('Error running IdleQueue Task: ', error)
+          }
+
           this.state_ = null
         }
       }
