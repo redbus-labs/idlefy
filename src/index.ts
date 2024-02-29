@@ -1,3 +1,1 @@
-import { IdleQueue } from './idleQueue'
-
-export { IdleQueue }
+export { IdleQueue } from './idleQueue'
