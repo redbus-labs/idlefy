@@ -15,12 +15,9 @@ const DEFAULT_MIN_TASK_TIME = 0
  * Returns true if the IdleDeadline object exists and the remaining time is
  * less or equal to than the minTaskTime. Otherwise returns false.
  */
-function shouldYield(deadline?: IdleDeadline, minTaskTime?: number) {
+function shouldYield(deadline?: IdleDeadline, minTaskTime?: number): boolean {
   // deadline.timeRemaining() means the time remaining till the browser is idle
-  if (deadline && deadline.timeRemaining() <= (minTaskTime || 0))
-    return true
-
-  return false
+  return (deadline && deadline.timeRemaining() <= (minTaskTime || 0)) || false
 }
 
 /**
@@ -43,7 +40,10 @@ export class IdleQueue {
    * Creates the IdleQueue instance and adds lifecycle event listeners to
    * run the queue if the page is hidden (with fallback behavior for Safari).
    */
-  constructor({ ensureTasksRun = false, defaultMinTaskTime = DEFAULT_MIN_TASK_TIME } = {}) {
+  constructor({
+    ensureTasksRun = false,
+    defaultMinTaskTime = DEFAULT_MIN_TASK_TIME,
+  } = {}) {
     this.defaultMinTaskTime_ = defaultMinTaskTime
     this.ensureTasksRun_ = ensureTasksRun
 
@@ -128,7 +128,10 @@ export class IdleQueue {
       visibilityState: isBrowser ? document.visibilityState : 'visible',
     }
 
-    const minTaskTime = Math.max(0, options?.minTaskTime || this.defaultMinTaskTime_)
+    const minTaskTime = Math.max(
+      0,
+      options?.minTaskTime || this.defaultMinTaskTime_,
+    )
 
     arrayMethod.call(this.taskQueue_, {
       state,
@@ -146,7 +149,11 @@ export class IdleQueue {
    * the document is in the visible state, `requestIdleCallback` is used.
    */
   private scheduleTasksToRun_() {
-    if (isBrowser && this.ensureTasksRun_ && document.visibilityState === 'hidden') {
+    if (
+      isBrowser
+      && this.ensureTasksRun_
+      && document.visibilityState === 'hidden'
+    ) {
       if (!this.queueMicrotask)
         this.queueMicrotask = createQueueMicrotask()
 
@@ -172,7 +179,10 @@ export class IdleQueue {
       this.isProcessing_ = true
 
       // Process tasks until there's no time left or we need to yield to input.
-      while (this.hasPendingTasks() && !shouldYield(deadline, this.taskQueue_[0].minTaskTime)) {
+      while (
+        this.hasPendingTasks()
+        && !shouldYield(deadline, this.taskQueue_[0].minTaskTime)
+      ) {
         const taskQueueItem = this.taskQueue_.shift()
         if (taskQueueItem) {
           const { task, state } = taskQueueItem

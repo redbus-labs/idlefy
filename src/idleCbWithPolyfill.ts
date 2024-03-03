@@ -45,10 +45,18 @@ function cancelIdleCallbackShim(handle: number | null) {
  are expected to be called with window as their context.
  */
 
+/**
+ * The native `requestIdleCallback()` function or `requestIdleCallbackShim()`
+ *.if the browser doesn't support it.
+ */
 const rIC = supportsRequestIdleCallback_
   ? requestIdleCallback.bind(window)
   : requestIdleCallbackShim
 
+/**
+ * The native `cancelIdleCallback()` function or `cancelIdleCallbackShim()`
+ * if the browser doesn't support it.
+ */
 const cIC = supportsRequestIdleCallback_
   ? cancelIdleCallback.bind(window)
   : cancelIdleCallbackShim

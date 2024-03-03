@@ -27,7 +27,6 @@ function createQueueMicrotaskViaMutationObserver(): (microtask: Microtask) => vo
 }
 
 /**
-/**
  * Schedules a microtask using the best available browser method
  * (queueMicrotask, Promises, or MutationObserver).
  */
