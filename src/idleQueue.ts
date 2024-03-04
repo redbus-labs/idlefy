@@ -10,7 +10,7 @@ interface State {
 
 type Task = (state: State) => void
 
-const DEFAULT_MIN_TASK_TIME = 0
+const DEFAULT_MIN_TASK_TIME: number = 0
 /**
  * Returns true if the IdleDeadline object exists and the remaining time is
  * less or equal to than the minTaskTime. Otherwise returns false.
@@ -29,7 +29,7 @@ function shouldYield(deadline?: IdleDeadline, minTaskTime?: number): boolean {
 export class IdleQueue {
   private idleCallbackHandle_: number | null = null
   private taskQueue_: { state: State, task: Task, minTaskTime: number }[] = []
-  private isProcessing_ = false
+  private isProcessing_: boolean = false
 
   private state_: State | null = null
   private defaultMinTaskTime_: number = DEFAULT_MIN_TASK_TIME
@@ -43,7 +43,7 @@ export class IdleQueue {
   constructor({
     ensureTasksRun = false,
     defaultMinTaskTime = DEFAULT_MIN_TASK_TIME,
-  } = {}) {
+  }: { ensureTasksRun?: boolean, defaultMinTaskTime?: number } = {}) {
     this.defaultMinTaskTime_ = defaultMinTaskTime
     this.ensureTasksRun_ = ensureTasksRun
 
@@ -65,23 +65,23 @@ export class IdleQueue {
     }
   }
 
-  pushTask(task: Task, options?: { minTaskTime?: number }) {
+  pushTask(task: Task, options?: { minTaskTime?: number }): void {
     this.addTask_(Array.prototype.push, task, options)
   }
 
-  unshiftTask(task: Task, options?: { minTaskTime?: number }) {
+  unshiftTask(task: Task, options?: { minTaskTime?: number }): void {
     this.addTask_(Array.prototype.unshift, task, options)
   }
 
   /**
    * Runs all scheduled tasks synchronously.
    */
-  runTasksImmediately() {
+  runTasksImmediately(): void {
     // By not passing a deadline, all tasks will be run sync.
     this.runTasks_()
   }
 
-  hasPendingTasks() {
+  hasPendingTasks(): boolean {
     return this.taskQueue_.length > 0
   }
 
@@ -89,7 +89,7 @@ export class IdleQueue {
    * Clears all pending tasks for the queue and stops any scheduled tasks
    * from running.
    */
-  clearPendingTasks() {
+  clearPendingTasks(): void {
     this.taskQueue_ = []
     this.cancelScheduledRun_()
   }
@@ -98,7 +98,7 @@ export class IdleQueue {
    * Returns the state object for the currently running task. If no task is
    * running, null is returned.
    */
-  getState() {
+  getState(): State | null {
     return this.state_
   }
 
@@ -106,7 +106,7 @@ export class IdleQueue {
    * Destroys the instance by un-registering all added event listeners and
    * removing any overridden methods.
    */
-  destroy() {
+  destroy(): void {
     this.taskQueue_ = []
     this.cancelScheduledRun_()
 
@@ -122,13 +122,13 @@ export class IdleQueue {
     arrayMethod: Array<any>['push'] | Array<any>['unshift'],
     task: Task,
     options?: { minTaskTime?: number },
-  ) {
+  ): void {
     const state: State = {
       time: now(),
       visibilityState: isBrowser ? document.visibilityState : 'visible',
     }
 
-    const minTaskTime = Math.max(
+    const minTaskTime: number = Math.max(
       0,
       options?.minTaskTime || this.defaultMinTaskTime_,
     )
@@ -148,7 +148,7 @@ export class IdleQueue {
    * in cases where a macrotask couldn't (like if the page is unloading). If
    * the document is in the visible state, `requestIdleCallback` is used.
    */
-  private scheduleTasksToRun_() {
+  private scheduleTasksToRun_(): void {
     if (
       isBrowser
       && this.ensureTasksRun_
@@ -172,7 +172,7 @@ export class IdleQueue {
    * then the tasks are run until there's no time remaining, at which point
    * we yield to input or other script and wait until the next idle time.
    */
-  private runTasks_(deadline?: IdleDeadline) {
+  private runTasks_(deadline?: IdleDeadline): void {
     this.cancelScheduledRun_()
 
     if (!this.isProcessing_) {
@@ -212,7 +212,7 @@ export class IdleQueue {
   /**
    * Cancels any scheduled idle callback and removes the handler (if set).
    */
-  private cancelScheduledRun_() {
+  private cancelScheduledRun_(): void {
     if (this.idleCallbackHandle_)
       cIC(this.idleCallbackHandle_)
 
@@ -223,7 +223,7 @@ export class IdleQueue {
    * A callback for the `visibilitychange` event that runs all pending
    * callbacks immediately if the document's visibility state is hidden.
    */
-  private onVisibilityChange_() {
+  private onVisibilityChange_(): void {
     if (isBrowser && document.visibilityState === 'hidden')
       this.runTasksImmediately()
   }
