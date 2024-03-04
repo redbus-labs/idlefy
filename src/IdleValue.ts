@@ -13,11 +13,19 @@ export class IdleValue<F extends () => any> {
    * Accepts a function to initialize the value of a variable when idle.
    */
   constructor(init: F) {
+    if (typeof init !== 'function')
+      throw new TypeError('init must be a function')
+
     this.init_ = init
 
     this.idleHandle_ = rIC(async () => {
-      this.value_ = this.init_()
-      this.initialized = true
+      try {
+        this.value_ = this.init_()
+        this.initialized = true
+      }
+      catch (error) {
+        console.error('Error initializing value:', error)
+      }
     })
   }
 
@@ -31,7 +39,12 @@ export class IdleValue<F extends () => any> {
     : Exclude<ReturnType<F>, undefined> {
     if (!this.initialized) {
       this.cancelIdleInit_()
-      this.value_ = this.init_()
+      try {
+        this.value_ = this.init_()
+      }
+      catch (error) {
+        console.error('Error getting value:', error)
+      }
     }
     return this.value_ as Exclude<ReturnType<F>, undefined>
   }
