@@ -3,16 +3,16 @@ import { cIC, rIC } from './idleCbWithPolyfill'
 /**
  * A class that wraps a value that is initialized when idle.
  */
-export class IdleValue<F extends () => any> {
-  private init_: F
-  private value_?: ReturnType<F>
+export class IdleValue<T, TInitFunc extends () => T> {
+  private init_: TInitFunc
+  private value_?: T
   private idleHandle_?: number
   initialized: boolean = false
 
   /**
    * Accepts a function to initialize the value of a variable when idle.
    */
-  constructor(init: F) {
+  constructor(init: TInitFunc) {
     if (typeof init !== 'function')
       throw new TypeError('init must be a function')
 
@@ -34,9 +34,7 @@ export class IdleValue<F extends () => any> {
    * initializer function is run immediately and the pending idle callback
    * is cancelled.
    */
-  getValue(): ReturnType<F> extends undefined
-    ? ReturnType<F>
-    : Exclude<ReturnType<F>, undefined> {
+  getValue(): T {
     if (!this.initialized) {
       this.cancelIdleInit_()
       try {
@@ -46,13 +44,10 @@ export class IdleValue<F extends () => any> {
         console.error('Error getting value:', error)
       }
     }
-    return this.value_ as Exclude<ReturnType<F>, undefined>
+    return this.value_! // Assert non-null value
   }
 
-  setValue(newValue: ReturnType<F>): void {
-    if (newValue === undefined)
-      throw new Error('newValue cannot be undefined')
-
+  setValue(newValue: T): void {
     this.cancelIdleInit_()
     this.value_ = newValue
     this.initialized = true
