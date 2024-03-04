@@ -1,7 +1,7 @@
 import { now } from './utils/now'
 import { isBrowser } from './utils/env'
 
-const supportsRequestIdleCallback_ = isBrowser && typeof requestIdleCallback === 'function'
+const supportsRequestIdleCallback_: boolean = isBrowser && typeof window.requestIdleCallback === 'function'
 
 /**
  * A minimal shim of the native IdleDeadline class.
@@ -13,11 +13,11 @@ class IdleDeadline {
     this.initTime_ = initTime
   }
 
-  get didTimeout() {
+  get didTimeout(): boolean {
     return false
   }
 
-  timeRemaining() {
+  timeRemaining(): number {
     return Math.max(0, 50 - (now() - this.initTime_))
   }
 }
@@ -27,12 +27,12 @@ class IdleDeadline {
  * `cancelIdleCallback` if native support is not available. Note that the
  * shim's `timeRemaining` calculation is an approximation.
  */
-function requestIdleCallbackShim(callback: (deadline: IdleDeadline) => void) {
-  const deadline = new IdleDeadline(now())
-  return setTimeout(() => callback(deadline), 0)
+function requestIdleCallbackShim(callback: (deadline: IdleDeadline) => void): number {
+  const timeoutId = setTimeout((deadline: IdleDeadline) => callback(deadline), 0)
+  return timeoutId as unknown as number
 }
 
-function cancelIdleCallbackShim(handle: number | null) {
+function cancelIdleCallbackShim(handle: number | null): void {
   if (handle)
     clearTimeout(handle)
 }
@@ -44,13 +44,24 @@ function cancelIdleCallbackShim(handle: number | null) {
  This is necessary because these functions are native browser APIs and
  are expected to be called with window as their context.
  */
+const _rIC = supportsRequestIdleCallback_ ? window.requestIdleCallback.bind(window) : requestIdleCallbackShim
 
-const rIC = supportsRequestIdleCallback_
-  ? requestIdleCallback.bind(window)
-  : requestIdleCallbackShim
+/**
+ * The native `requestIdleCallback()` function or `requestIdleCallbackShim()`
+ *.if the browser doesn't support it.
+ */
 
-const cIC = supportsRequestIdleCallback_
-  ? cancelIdleCallback.bind(window)
+const rIC: (callback: (deadline: IdleDeadline) => void) => number = (callback: (deadline: IdleDeadline) => void) => _rIC((idleDeadline) => {
+  const deadline = new IdleDeadline(idleDeadline?.timeRemaining() ?? now())
+  callback(deadline)
+})
+
+/**
+ * The native `cancelIdleCallback()` function or `cancelIdleCallbackShim()`
+ * if the browser doesn't support it.
+ */
+const cIC: (handle: number) => void = supportsRequestIdleCallback_
+  ? window.cancelIdleCallback.bind(window)
   : cancelIdleCallbackShim
 
 export { rIC, cIC }
