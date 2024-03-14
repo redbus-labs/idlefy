@@ -28,7 +28,8 @@ class IdleDeadline {
  * shim's `timeRemaining` calculation is an approximation.
  */
 function requestIdleCallbackShim(callback: (deadline: IdleDeadline) => void): number {
-  const timeoutId = setTimeout((deadline: IdleDeadline) => callback(deadline), 0)
+  const deadline = new IdleDeadline(now())
+  const timeoutId = setTimeout(() => callback(deadline), 0)
   return timeoutId as unknown as number
 }
 
@@ -37,6 +38,11 @@ function cancelIdleCallbackShim(handle: number | null): void {
     clearTimeout(handle)
 }
 
+/**
+ * The native `requestIdleCallback()` function or `requestIdleCallbackShim()`
+ *.if the browser doesn't support it.
+ */
+
 /*
  The bind is used  to ensure that the context of
  the requestIdleCallback and cancelIdleCallback methods is always the window object,
@@ -44,17 +50,7 @@ function cancelIdleCallbackShim(handle: number | null): void {
  This is necessary because these functions are native browser APIs and
  are expected to be called with window as their context.
  */
-const _rIC = supportsRequestIdleCallback_ ? window.requestIdleCallback.bind(window) : requestIdleCallbackShim
-
-/**
- * The native `requestIdleCallback()` function or `requestIdleCallbackShim()`
- *.if the browser doesn't support it.
- */
-
-const rIC: (callback: (deadline: IdleDeadline) => void) => number = (callback: (deadline: IdleDeadline) => void) => _rIC((idleDeadline) => {
-  const deadline = new IdleDeadline(idleDeadline?.timeRemaining() ?? now())
-  callback(deadline)
-})
+const rIC = supportsRequestIdleCallback_ ? window.requestIdleCallback.bind(window) : requestIdleCallbackShim
 
 /**
  * The native `cancelIdleCallback()` function or `cancelIdleCallbackShim()`
