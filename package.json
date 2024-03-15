@@ -1,7 +1,7 @@
 {
   "name": "idlefy",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "packageManager": "pnpm@8.15.3",
   "description": "Defer non-critical tasks to run when the main thread is idle",
   "author": {
