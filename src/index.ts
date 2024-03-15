@@ -1,1 +1,5 @@
 export { IdleQueue } from './idleQueue'
+export { defineIdleProperty } from './defineIdleProperty'
+export { defineIdleProperties } from './defineIdleProperties'
+export { cIC, rIC } from './idleCbWithPolyfill'
+export { IdleValue } from './idleValue'

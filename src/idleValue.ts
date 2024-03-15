@@ -39,6 +39,7 @@ export class IdleValue<T, TInitFunc extends () => T> {
       this.cancelIdleInit_()
       try {
         this.value_ = this.init_()
+        this.initialized = true
       }
       catch (error) {
         console.error('Error getting value:', error)

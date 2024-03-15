@@ -31,8 +31,31 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "require": "./dist/min/index.cjs",
+      "default": "./dist/index.mjs"
+    },
+    "./min": {
+      "default": "./dist/min/index.mjs"
+    },
+    "./idleQueue.js": {
+      "types": "./dist/idleQueue.d.ts",
+      "default": "./dist/idleQueue.mjs"
+    },
+    "./idleCbWithPolyfill.js": {
+      "types": "./dist/idleCbWithPolyfill.d.ts",
+      "default": "./dist/idleCbWithPolyfill.mjs"
+    },
+    "./idleValue.js": {
+      "types": "./dist/idleValue.d.ts",
+      "default": "./dist/idleValue.mjs"
+    },
+    "./defineIdleProperty.js": {
+      "types": "./dist/defineIdleProperty.d.ts",
+      "default": "./dist/defineIdleProperty.mjs"
+    },
+    "./defineIdleProperties.js": {
+      "types": "./dist/defineIdleProperties.d.ts",
+      "default": "./dist/defineIdleProperties.mjs"
     }
   },
   "main": "./dist/index.mjs",
