@@ -1,6 +1,6 @@
 # idlefy
 
-### Defer non-critical tasks to run when the main thread is idle
+### Defer non-critical tasks to execute when the main thread is idle
 
 The `idlefy` library is a collection of JavaScript tools designed to help you improve website performance by strategically scheduling tasks to run during the browser's idle periods. This adheres to the [*idle-until-urgent*](https://philipwalton.com/articles/idle-until-urgent/)  pattern.
 
