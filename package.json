@@ -30,34 +30,33 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.mjs"
+      "types": "./dist/modules/index.d.ts",
+      "default": "./dist/index.js"
     },
-    "./min/index.mjs": "./dist/min/index.mjs",
     "./idleQueue.js": {
-      "types": "./dist/idleQueue.d.ts",
-      "default": "./dist/idleQueue.mjs"
+      "types": "./dist/modules/idleQueue.d.ts",
+      "default": "./dist/modules/idleQueue.js"
     },
     "./idleCbWithPolyfill.js": {
-      "types": "./dist/idleCbWithPolyfill.d.ts",
-      "default": "./dist/idleCbWithPolyfill.mjs"
+      "types": "./dist/modules/idleCbWithPolyfill.d.ts",
+      "default": "./dist/modules/idleCbWithPolyfill.js"
     },
     "./idleValue.js": {
-      "types": "./dist/idleValue.d.ts",
-      "default": "./dist/idleValue.mjs"
+      "types": "./dist/modules/idleValue.d.ts",
+      "default": "./dist/modules/idleValue.js"
     },
     "./defineIdleProperty.js": {
-      "types": "./dist/defineIdleProperty.d.ts",
-      "default": "./dist/defineIdleProperty.mjs"
+      "types": "./dist/modules/defineIdleProperty.d.ts",
+      "default": "./dist/modules/defineIdleProperty.js"
     },
     "./defineIdleProperties.js": {
-      "types": "./dist/defineIdleProperties.d.ts",
-      "default": "./dist/defineIdleProperties.mjs"
+      "types": "./dist/modules/defineIdleProperties.d.ts",
+      "default": "./dist/modules/defineIdleProperties.js"
     }
   },
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/modules/index.d.ts",
   "typesVersions": {
     "*": {
       "*": [
@@ -70,7 +69,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "unbuild",
+    "build": "rimraf dist && rimraf tsconfig.tsbuildinfo && tsc -b && rollup -c",
+    "build:ts": "tsc -b",
+    "build:js": "rollup -c",
     "dev": "unbuild --stub",
     "lint": "eslint .",
     "prepublishOnly": "nr build",
@@ -84,6 +85,10 @@
     "@antfu/eslint-config": "^2.6.4",
     "@antfu/ni": "^0.21.12",
     "@antfu/utils": "^0.7.7",
+    "@babel/core": "^7.23.6",
+    "@babel/preset-env": "^7.23.6",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-terser": "^0.4.4",
     "@types/node": "^20.11.19",
     "bumpp": "^9.3.0",
     "eslint": "^8.56.0",
@@ -91,6 +96,7 @@
     "lint-staged": "^15.2.2",
     "pnpm": "^8.15.3",
     "rimraf": "^5.0.5",
+    "rollup": "^4.9.1",
     "simple-git-hooks": "^2.9.0",
     "typescript": "^5.3.3",
     "unbuild": "^2.0.0",

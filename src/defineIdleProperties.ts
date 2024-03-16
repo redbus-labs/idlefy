@@ -1,4 +1,4 @@
-import { defineIdleProperty } from './defineIdleProperty'
+import { defineIdleProperty } from './defineIdleProperty.js'
 
 export function defineIdleProperties<T, K extends PropertyKey>( // K for Key type
   obj: Record<K, any>,

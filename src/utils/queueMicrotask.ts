@@ -1,4 +1,4 @@
-import { isBrowser } from './env'
+import { isBrowser } from './env.js'
 
 type Microtask = () => void
 

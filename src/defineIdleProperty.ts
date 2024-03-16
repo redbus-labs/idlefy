@@ -1,4 +1,4 @@
-import { IdleValue } from './idleValue'
+import { IdleValue } from './idleValue.js'
 
 export function defineIdleProperty<T, TInitFunc extends () => T, K extends PropertyKey>( // Add K
   obj: Record<K, any>,

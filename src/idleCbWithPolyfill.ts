@@ -1,5 +1,5 @@
-import { now } from './utils/now'
-import { isBrowser } from './utils/env'
+import { now } from './utils/now.js'
+import { isBrowser } from './utils/env.js'
 
 const supportsRequestIdleCallback_: boolean = isBrowser && typeof window.requestIdleCallback === 'function'
 

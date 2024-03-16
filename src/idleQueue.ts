@@ -1,7 +1,7 @@
-import { cIC, rIC } from './idleCbWithPolyfill'
-import { createQueueMicrotask } from './utils/queueMicrotask'
-import { isBrowser, isSafari } from './utils/env'
-import { now } from './utils/now'
+import { cIC, rIC } from './idleCbWithPolyfill.js'
+import { createQueueMicrotask } from './utils/queueMicrotask.js'
+import { isBrowser, isSafari } from './utils/env.js'
+import { now } from './utils/now.js'
 
 interface State {
   time: number

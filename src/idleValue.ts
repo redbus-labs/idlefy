@@ -1,4 +1,4 @@
-import { cIC, rIC } from './idleCbWithPolyfill'
+import { cIC, rIC } from './idleCbWithPolyfill.js'
 
 /**
  * A class that wraps a value that is initialized when idle.
