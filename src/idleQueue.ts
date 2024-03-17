@@ -130,7 +130,7 @@ export class IdleQueue {
 
     const minTaskTime: number = Math.max(
       0,
-      options?.minTaskTime || this.defaultMinTaskTime_,
+      (options && options.minTaskTime) || this.defaultMinTaskTime_,
     )
 
     arrayMethod.call(this.taskQueue_, {

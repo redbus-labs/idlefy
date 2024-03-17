@@ -31,7 +31,7 @@ export default defineBuildConfig([
       esbuild: {
         minify: true,
       },
-      emitCJS: false,
+      emitCJS: true,
     },
     failOnWarn: false,
   },

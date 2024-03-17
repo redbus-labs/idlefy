@@ -31,9 +31,14 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "require": "./dist/min/index.cjs",
       "default": "./dist/index.mjs"
     },
-    "./min/index.mjs": "./dist/min/index.mjs",
+    "./min": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/min/index.cjs",
+      "default": "./dist/min/index.mjs"
+    },
     "./idleQueue.js": {
       "types": "./dist/idleQueue.d.ts",
       "default": "./dist/idleQueue.mjs"
