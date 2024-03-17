@@ -22,7 +22,7 @@ npm install idlefy
 // imports all helpers methods and classes from idlefy library
 import { idleQueue, idleValue } from 'idlefy'
 // import only methods and classes you need
-import { IdleQueue } from 'idlefy/idleQueue'
+import { IdleQueue } from 'idlefy/idleQueue.js'
 // import methods from minified build
 import { IdleQueue } from 'idlefy/min'
 ```
@@ -49,7 +49,7 @@ This class offers a few benefits over the regular usage of [`requestIdleCallback
 ### Usage
 
 ```js
-import { IdleQueue } from 'idlefy/idleQueue'
+import { IdleQueue } from 'idlefy/idleQueue.js'
 
 const queue = new IdleQueue()
 
@@ -184,7 +184,7 @@ It's useful when you want to initialize a value during an idle period but ensure
 ### Usage
 
 ```js
-import { IdleValue } from 'idlefy/idleValue'
+import { IdleValue } from 'idlefy/idleValue.js'
 
 class MyClass {
   constructor() {
@@ -257,7 +257,7 @@ These are not full polyfills (since the native APIs cannot be fully polyfilled),
 ### Usage
 
 ```js
-import { cIC, rIC } from 'idlefy/idleCbWithPolyfill'
+import { cIC, rIC } from 'idlefy/idleCbWithPolyfill.js'
 
 // To run a task when idle.
 const handle = rIC(() => {
@@ -295,7 +295,7 @@ See the [`cancelIdleCallback()` docs on MDN](https://developer.mozilla.org/en-US
 ### Usage
 
 ```js
-import { defineIdleProperty } from 'idlefy/defineIdleProperty'
+import { defineIdleProperty } from 'idlefy/defineIdleProperty.js'
 
 class MyClass {
   constructor() {
@@ -360,7 +360,7 @@ defineIdleProperty(obj, prop, init)
 ### Usage
 
 ```js
-import { defineIdleProperties } from 'idlefy/defineIdleProperties'
+import { defineIdleProperties } from 'idlefy/defineIdleProperties.js'
 
 class MyClass {
   constructor() {
