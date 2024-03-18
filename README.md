@@ -20,7 +20,7 @@ npm install idlefy
 
 ```js
 // imports all helpers methods and classes from idlefy library
-import { idleQueue, idleValue } from 'idlefy'
+import { IdleQueue, IdleValue } from 'idlefy'
 // import only methods and classes you need
 import { IdleQueue } from 'idlefy/idleQueue.js'
 // import methods from minified build
