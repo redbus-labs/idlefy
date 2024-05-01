@@ -11,13 +11,14 @@ interface State {
 type Task = (state: State) => void
 
 const DEFAULT_MIN_TASK_TIME: number = 0
+const DEFAULT_MAX_TASKS_PER_ITERATION: number = 100
 /**
  * Returns true if the IdleDeadline object exists and the remaining time is
  * less or equal to than the minTaskTime. Otherwise returns false.
  */
 function shouldYield(deadline?: IdleDeadline, minTaskTime?: number): boolean {
   // deadline.timeRemaining() means the time remaining till the browser is idle
-  return (deadline && deadline.timeRemaining() <= (minTaskTime || 0)) || false
+  return !!(deadline && deadline.timeRemaining() <= (minTaskTime || 0))
 }
 
 /**
@@ -33,6 +34,7 @@ export class IdleQueue {
 
   private state_: State | null = null
   private defaultMinTaskTime_: number = DEFAULT_MIN_TASK_TIME
+  private maxTasksPerIteration_: number = DEFAULT_MAX_TASKS_PER_ITERATION
   private ensureTasksRun_: boolean = false
   private queueMicrotask?: (callback: VoidFunction) => void
 
@@ -43,17 +45,18 @@ export class IdleQueue {
   constructor({
     ensureTasksRun = false,
     defaultMinTaskTime = DEFAULT_MIN_TASK_TIME,
-  }: { ensureTasksRun?: boolean, defaultMinTaskTime?: number } = {}) {
+    maxTasksPerIteration = DEFAULT_MAX_TASKS_PER_ITERATION,
+  }: { ensureTasksRun?: boolean, defaultMinTaskTime?: number, maxTasksPerIteration?: number } = {}) {
     this.defaultMinTaskTime_ = defaultMinTaskTime
     this.ensureTasksRun_ = ensureTasksRun
+    this.maxTasksPerIteration_ = maxTasksPerIteration
 
-    // Bind methods
+    // bind methods
     this.runTasksImmediately = this.runTasksImmediately.bind(this)
     this.runTasks_ = this.runTasks_.bind(this)
-    this.onVisibilityChange_ = this.onVisibilityChange_.bind(this)
 
     if (isBrowser && this.ensureTasksRun_) {
-      addEventListener('visibilitychange', this.onVisibilityChange_, true)
+      addEventListener('visibilitychange', this.runTasksImmediately, true)
 
       if (isSafari) {
         // Safari workaround: Due to unreliable event behavior, we use 'beforeunload'
@@ -66,11 +69,11 @@ export class IdleQueue {
   }
 
   pushTask(task: Task, options?: { minTaskTime?: number }): void {
-    this.addTask_(Array.prototype.push, task, options)
+    this.addTask_(task, options)
   }
 
   unshiftTask(task: Task, options?: { minTaskTime?: number }): void {
-    this.addTask_(Array.prototype.unshift, task, options)
+    this.addTask_(task, options, true)
   }
 
   /**
@@ -111,7 +114,7 @@ export class IdleQueue {
     this.cancelScheduledRun_()
 
     if (isBrowser && this.ensureTasksRun_) {
-      removeEventListener('visibilitychange', this.onVisibilityChange_, true)
+      removeEventListener('visibilitychange', this.runTasksImmediately, true)
 
       if (isSafari)
         removeEventListener('beforeunload', this.runTasksImmediately, true)
@@ -119,9 +122,9 @@ export class IdleQueue {
   }
 
   private addTask_(
-    arrayMethod: Array<any>['push'] | Array<any>['unshift'],
     task: Task,
     options?: { minTaskTime?: number },
+    unshift: boolean = false,
   ): void {
     const state: State = {
       time: now(),
@@ -133,11 +136,16 @@ export class IdleQueue {
       (options && options.minTaskTime) || this.defaultMinTaskTime_,
     )
 
-    arrayMethod.call(this.taskQueue_, {
+    const taskQueueItem = {
       state,
       task,
       minTaskTime,
-    })
+    }
+
+    if (unshift)
+      this.taskQueue_.unshift(taskQueueItem)
+    else
+      this.taskQueue_.push(taskQueueItem)
 
     this.scheduleTasksToRun_()
   }
@@ -177,10 +185,13 @@ export class IdleQueue {
 
     if (!this.isProcessing_) {
       this.isProcessing_ = true
+      let tasksProcessed = 0
 
-      // Process tasks until there's no time left or we need to yield to input.
+      // Process tasks until there's no time left, and for fixed iterations so that the main thread is not kept blocked,
+      // and till we need to yield to input.
       while (
         this.hasPendingTasks()
+        && tasksProcessed < this.maxTasksPerIteration_
         && !shouldYield(deadline, this.taskQueue_[0].minTaskTime)
       ) {
         const taskQueueItem = this.taskQueue_.shift()
@@ -197,6 +208,7 @@ export class IdleQueue {
           }
 
           this.state_ = null
+          tasksProcessed++
         }
       }
 
@@ -217,14 +229,5 @@ export class IdleQueue {
       cIC(this.idleCallbackHandle_)
 
     this.idleCallbackHandle_ = null
-  }
-
-  /**
-   * A callback for the `visibilitychange` event that runs all pending
-   * callbacks immediately if the document's visibility state is hidden.
-   */
-  private onVisibilityChange_(): void {
-    if (isBrowser && document.visibilityState === 'hidden')
-      this.runTasksImmediately()
   }
 }
