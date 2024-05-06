@@ -56,7 +56,10 @@ export class IdleQueue {
     this.runTasks_ = this.runTasks_.bind(this)
 
     if (isBrowser && this.ensureTasksRun_) {
-      addEventListener('visibilitychange', this.runTasksImmediately, true)
+      addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden')
+          this.runTasksImmediately()
+      }, true)
 
       if (isSafari) {
         // Safari workaround: Due to unreliable event behavior, we use 'beforeunload'
