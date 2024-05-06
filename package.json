@@ -32,7 +32,7 @@
     ".": {
       "types": "./dist/index.d.ts",
       "require": "./dist/min/index.cjs",
-      "default": "./dist/index.mjs"
+      "default": "./dist/min/index.mjs"
     },
     "./min": {
       "types": "./dist/index.d.ts",
@@ -60,8 +60,8 @@
       "default": "./dist/defineIdleProperties.mjs"
     }
   },
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
+  "main": "./dist/min/index.mjs",
+  "module": "./dist/min/index.mjs",
   "types": "./dist/index.d.ts",
   "typesVersions": {
     "*": {
